@@ -13,29 +13,39 @@ public class Dialogue : MonoBehaviour
     [Header("Optional: Auto-disable on finish")]
     public bool disableOnFinish = true;
 
-    private PlayerInputActions inputActions;  // Your generated class
+    [Header("Player Control")]
+    public CharacterMovement playerMovement; // Assign in Inspector!
+
+    private PlayerInputActions inputActions;
     private int index;
 
     private void Awake()
     {
-        // Create instance once in Awake (better than Start)
         inputActions = new PlayerInputActions();
+
+        // Auto-find if not assigned
+        if (playerMovement == null)
+            playerMovement = FindObjectOfType<CharacterMovement>();
     }
 
     private void OnEnable()
     {
-        // Always enable input when this object is active
         inputActions.Enable();
-        
-        // Optional: Subscribe to Submit action via event (cleaner than polling)
         inputActions.UI.Submit.performed += OnSubmitPerformed;
+
+        // Disable player movement when dialogue starts
+        if (playerMovement != null)
+            playerMovement.DisableMovement();
     }
 
     private void OnDisable()
     {
-        // Always clean up
         inputActions.UI.Submit.performed -= OnSubmitPerformed;
         inputActions.Disable();
+
+        // Re-enable movement when dialogue ends
+        if (playerMovement != null)
+            playerMovement.EnableMovement();
     }
 
     private void Start()
